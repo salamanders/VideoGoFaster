@@ -8,8 +8,10 @@ espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.1"
 composeBom = "2025.12.00"
+ffmpegKit = "6.0.LTS"
 
 [libraries]
+ffmpeg-kit-full-gpl = { group = "com.arthenica", name = "ffmpeg-kit-full-gpl", version.ref = "ffmpegKit" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
