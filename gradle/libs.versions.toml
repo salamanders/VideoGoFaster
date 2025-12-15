@@ -1,4 +1,5 @@
 [versions]
+# Verified latest stable versions as of late 2025
 agp = "8.13.2"
 kotlin = "2.2.21"
 coreKtx = "1.17.0"
