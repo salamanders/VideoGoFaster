@@ -1,7 +1,7 @@
 package info.benjaminhill.videogofaster
 
-import com.arthenica.ffmpegkit.FFmpegKit
-import com.arthenica.ffmpegkit.FFmpegSession
+import com.antonkarpenko.ffmpegkit.FFmpegKit
+import com.antonkarpenko.ffmpegkit.FFmpegSession
 
 object VideoProcessor {
 
