@@ -36,6 +36,11 @@ android {
     buildFeatures {
         compose = true
     }
+    packaging {
+        jniLibs {
+            keepDebugSymbols += listOf("libffmpegkit.so", "libx265.so", "libavcodec.so", "libavdevice.so", "libavfilter.so", "libavformat.so", "libavutil.so", "libswresample.so", "libswscale.so")
+        }
+    }
 }
 
 kotlin {
