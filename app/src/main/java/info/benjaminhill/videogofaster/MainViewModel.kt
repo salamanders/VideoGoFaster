@@ -19,12 +19,19 @@ data class UiState(
     val outputLogs: List<String> = emptyList()
 )
 
+/**
+ * Responsibility: Manages application state and orchestrates data flow.
+ * Separation of Concerns: This ViewModel connects the UI (MainActivity) to the Domain logic
+ * (VideoProcessor) and Data layer (StorageUtils). It does not know *how* to process video,
+ * only *when* to do so and how to report progress.
+ */
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     fun startProcessing(sourceUri: Uri) {
+        // Prevent concurrent processing
         if (_uiState.value.isLoading) return
 
         viewModelScope.launch(Dispatchers.IO) {
@@ -33,13 +40,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val context = getApplication<Application>().applicationContext
 
             // 1. Copy to Cache
-            val originalFile = Utils.copyUriToCache(context, sourceUri)
+            val originalFile = StorageUtils.copyUriToCache(context, sourceUri)
             if (originalFile == null) {
                 _uiState.update { it.copy(isLoading = false, currentStep = "Error: Could not access video file.") }
                 return@launch
             }
 
-            val originalName = Utils.getFileName(context, sourceUri)
+            val originalName = StorageUtils.getFileName(context, sourceUri)
             val speeds = listOf(2, 4, 8)
 
             try {
@@ -57,7 +64,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     if (ReturnCode.isSuccess(session.returnCode)) {
                         // Save to MediaStore
-                        val savedName = Utils.saveVideoToMediaStore(context, outputFile, originalName, speed)
+                        val savedName = StorageUtils.saveVideoToMediaStore(context, outputFile, originalName, speed)
                         if (savedName != null) {
                             val msg = "Saved: $savedName"
                             _uiState.update { it.copy(outputLogs = it.outputLogs + msg) }

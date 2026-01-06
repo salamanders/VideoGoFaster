@@ -10,7 +10,13 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 
-object Utils {
+/**
+ * Responsibility: Handles all platform-specific storage interactions.
+ * Separation of Concerns: This object isolates low-level File I/O and Android MediaStore
+ * operations from the business logic, ensuring other components don't need to know
+ * how bytes are moved or where files are stored.
+ */
+object StorageUtils {
 
     fun copyUriToCache(context: Context, uri: Uri): File? {
         val contentResolver = context.contentResolver
