@@ -104,7 +104,7 @@ suspend fun processVideo(
     // - select='not(mod(n,N))': Keeps only the blended frames (effectively dropping intermediates).
     // - setpts=M*PTS: Speeds up playback to match frame reduction.
     val filterChain =
-        "format=pix_fmts=yuv420p10le,tmix=frames=$blendFactor:weights=1,select='not(mod(n\\,$blendFactor))',setpts=$ptsModifier*PTS"
+        "format=pix_fmts=yuv420p10le,tmix=frames=$blendFactor,select='not(mod(n\\,$blendFactor))',setpts=$ptsModifier*PTS"
 
     // 3. Construct Command
     // -c:v libx265: Use software HEVC encoder for consistent 10-bit support.
