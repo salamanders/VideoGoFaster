@@ -31,6 +31,11 @@ import androidx.compose.ui.unit.dp
 import androidx.activity.compose.rememberLauncherForActivityResult
 import info.benjaminhill.videogofaster.ui.theme.VideoGoFasterTheme
 
+/**
+ * Responsibility: The View layer, responsible solely for rendering the UI based on the State.
+ * Separation of Concerns: This Activity observes the ViewModel's state and passes user actions
+ * back to the ViewModel. It contains no business logic or data manipulation.
+ */
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModels()
@@ -40,7 +45,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             VideoGoFasterTheme {
-                // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
