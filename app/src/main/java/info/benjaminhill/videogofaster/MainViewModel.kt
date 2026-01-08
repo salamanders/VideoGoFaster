@@ -35,14 +35,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (_uiState.value.isLoading) return
 
         viewModelScope.launch(Dispatchers.IO) {
-            _uiState.update { it.copy(isLoading = true, currentStep = "Preparing...", outputLogs = emptyList()) }
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    currentStep = "Preparing...",
+                    outputLogs = emptyList()
+                )
+            }
 
             val context = getApplication<Application>().applicationContext
 
             // 1. Copy to Cache
             val originalFile = StorageUtils.copyUriToCache(context, sourceUri)
             if (originalFile == null) {
-                _uiState.update { it.copy(isLoading = false, currentStep = "Error: Could not access video file.") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        currentStep = "Error: Could not access video file."
+                    )
+                }
                 return@launch
             }
 
@@ -64,7 +75,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
                     if (ReturnCode.isSuccess(session.returnCode)) {
                         // Save to MediaStore
-                        val savedName = StorageUtils.saveVideoToMediaStore(context, outputFile, originalName, speed)
+                        val savedName = StorageUtils.saveVideoToMediaStore(
+                            context,
+                            outputFile,
+                            originalName,
+                            speed
+                        )
                         if (savedName != null) {
                             val msg = "Saved: $savedName"
                             _uiState.update { it.copy(outputLogs = it.outputLogs + msg) }

@@ -36,11 +36,19 @@ object StorageUtils {
         }
     }
 
-    fun saveVideoToMediaStore(context: Context, videoFile: File, originalName: String, speed: Int): String? {
+    fun saveVideoToMediaStore(
+        context: Context,
+        videoFile: File,
+        originalName: String,
+        speed: Int
+    ): String? {
         val contentValues = ContentValues().apply {
             put(MediaStore.Video.Media.DISPLAY_NAME, "${originalName}_${speed}x_10bit.mp4")
             put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
-            put(MediaStore.Video.Media.RELATIVE_PATH, Environment.DIRECTORY_MOVIES + "/VideoGoFaster")
+            put(
+                MediaStore.Video.Media.RELATIVE_PATH,
+                Environment.DIRECTORY_MOVIES + "/VideoGoFaster"
+            )
         }
 
         val contentResolver = context.contentResolver

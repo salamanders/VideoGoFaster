@@ -6,7 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.antonkarpenko.ffmpegkit.ReturnCode
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,7 +28,7 @@ class VideoProcessingIntegrationTest {
         outputDir = context.cacheDir
         // Ensure we start with a clean slate for the input file
         inputVideoFile = File(outputDir, "input_test_video.mp4")
-        copyResourceToTempFile(info.benjaminhill.videogofaster.R.raw.test_video, inputVideoFile)
+        copyResourceToTempFile(R.raw.test_video, inputVideoFile)
     }
 
     @Test
