@@ -87,3 +87,5 @@ Common errors observed:
 *   `Broken pipe` during APK push/install.
 
 **Conclusion:** Instrumented tests are currently not viable in this unaccelerated sandbox environment due to emulator instability.
+Attempts to increase `vm.heapSize` to 256M and use `hw.ramSize=2G` did not resolve the boot timeout or `PackageManager` crashes.
+The emulator processes start, but system services often fail to initialize within a reasonable timeframe (>10 minutes).
