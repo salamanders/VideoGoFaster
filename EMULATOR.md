@@ -5,19 +5,19 @@ This document describes how to set up and run the Android Emulator in the Jules 
 ## Investigation Findings
 
 The sandbox environment runs on Ubuntu 24.04 (Noble Numbat) on x86_64 architecture.
-Crucially, **KVM (Kernel-based Virtual Machine) is not available** (`/dev/kvm` access fails or is missing, and CPU flags lack `vmx`).
+Crucially, **KVM (Kernel-based Virtual Machine) is not available** (`/dev/kvm` access fails or is missing).
 This means hardware acceleration for the emulator is disabled.
 
-However, it is possible to run the emulator in **software rendering mode** (`swiftshader_indirect`) with acceleration explicitly disabled (`-accel off`).
-**Warning:** This mode is extremely slow. Booting the emulator can take several minutes, and `adb` operations may time out.
+The emulator must run in **software rendering mode** (`swiftshader_indirect`) with acceleration explicitly disabled (`-accel off`).
+**Warning:** This mode is extremely slow and unstable. While the emulator process starts, Android system services (like `PackageManager`) often fail to initialize or crash due to timeouts, making `adb install` and Instrumented Tests unreliable.
 
 ## Setup Instructions
 
 ### 1. Prerequisites
-Ensure `java`, `wget`, and `unzip` are installed (available by default in this environment).
+Ensure `java`, `wget`, and `unzip` are installed (available by default).
 
 ### 2. Install Android SDK Command Line Tools
-Download the latest Linux command line tools from Google.
+Run the following commands to set up the SDK structure and download the tools:
 
 ```bash
 mkdir -p ~/android-sdk/cmdline-tools
@@ -29,7 +29,7 @@ rm cmdline-tools.zip
 ```
 
 ### 3. Configure Environment Variables
-Set up `ANDROID_HOME` and update `PATH`. You may want to add this to your `.bashrc` or export it in your session.
+Export these variables (add to `~/.bashrc` or run in your session):
 
 ```bash
 export ANDROID_HOME=$HOME/android-sdk
@@ -37,46 +37,53 @@ export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:
 ```
 
 ### 4. Install SDK Packages
-Install the necessary platform tools, platforms, build tools, emulator, and system images.
-Note: Adjust versions as needed by your project.
+Install the platforms and tools required by the project (`compileSdk 36`, `minSdk 35`):
 
 ```bash
 # Accept licenses
 yes | sdkmanager --licenses > /dev/null
 
 # Install packages
-sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "emulator" "system-images;android-35;google_apis;x86_64"
+# Note: Using system-images;android-35 because 36 images may be unstable/unavailable
+sdkmanager "platform-tools" "platforms;android-36" "build-tools;35.0.0" "emulator" "system-images;android-35;google_apis;x86_64"
 ```
 
 ### 5. Create Android Virtual Device (AVD)
-Create an AVD named `test_avd`.
 
 ```bash
 echo "no" | avdmanager create avd -n test_avd -k "system-images;android-35;google_apis;x86_64" --force
 ```
 
 ### 6. Start the Emulator
-Run the emulator in headless mode with software rendering and acceleration disabled.
+Run headless with software rendering:
 
 ```bash
-emulator -avd test_avd -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -accel off &
+emulator -avd test_avd -no-window -gpu swiftshader_indirect -no-audio -no-boot-anim -accel off > emulator.log 2>&1 &
 ```
 
-*   `-no-window`: Run headless (no GUI).
-*   `-gpu swiftshader_indirect`: Use SwiftShader for software graphics rendering.
-*   `-no-audio`: Disable audio support.
-*   `-no-boot-anim`: Skip boot animation for faster startup.
-*   `-accel off`: Explicitly disable hardware acceleration (required since KVM is missing).
-
-### 7. Verification
-Check if the device is attached. It will initially be `offline` and eventually become `device`.
-
+Wait for the device:
 ```bash
-adb devices
+adb wait-for-device
+# Note: sys.boot_completed may timeout or never return '1' in this environment
+adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
 ```
 
-Wait for the boot to complete (this may take a long time):
+## Baseline Test Results
 
-```bash
-adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
-```
+### Unit Tests
+**Status: PASS**
+Command: `./gradlew testDebugUnitTest`
+Result: Tests passed successfully.
+
+### Instrumented Tests
+**Status: FAIL**
+Command: `./gradlew connectedDebugAndroidTest`
+Result: Failed to run.
+Details:
+The emulator boots (adb connects), but `adb install` fails, preventing tests from running.
+Common errors observed:
+*   `cmd: Can't find service: package` (PackageManagerService failed to start)
+*   `java.lang.NullPointerException` in `StorageManagerService` (Dependency on PackageManager failed)
+*   `Broken pipe` during APK push/install.
+
+**Conclusion:** Instrumented tests are currently not viable in this unaccelerated sandbox environment due to emulator instability.
